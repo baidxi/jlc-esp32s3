@@ -1,0 +1,23 @@
+idf_component_register(SRCS
+                        "main.c"
+                        "src/board.c"
+                        "src/i2c/i2c_esp32.c"
+                        "src/core.c"
+                        "src/bus.c"
+                        "src/device.c"
+                        "src/driver.c"
+                        "src/i2c/i2c.c"
+                        "src/i2c/i2c_qmi8658a.c"
+                        "src/tty/core.c"
+                        "src/shell/shell_cmds.c"
+                        "src/shell/shell_platform.c"
+                        "src/shell/shell_platform_esp32.c"
+                        "src/shell/core.c"
+                        "src/fs/sysfs.c"
+                        "src/cmd/cmd_help.c"
+                        "src/cmd/cmd_top.c"
+                        "src/cmd/cmd_clear.c"
+                        "src/cmd/cmd_reboot.c"
+                        "src/cmd/cmd_ls.c"
+                       PRIV_REQUIRES driver esp_timer
+                       INCLUDE_DIRS "./inc")

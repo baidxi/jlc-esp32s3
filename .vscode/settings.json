@@ -1,0 +1,11 @@
+{
+    "idf.flashType": "JTAG",
+    "idf.openOcdConfigs": [
+        "board/esp32s3-builtin.cfg"
+    ],
+    "files.associations": {
+        "shell.h": "c",
+        "freertos.h": "c",
+        "stdarg.h": "c"
+    }
+}
