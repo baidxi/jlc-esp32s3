@@ -272,6 +272,14 @@ static int esp32_strcmp(const char *s1, const char *s2)
 }
 
 /**
+ * @brief ESP32字符串比较（指定长度）
+ */
+static int esp32_strncmp(const char *s1, const char *s2, size_t n)
+{
+    return strncmp(s1, s2, n);
+}
+
+/**
  * @brief ESP32字符串长度
  */
 static size_t esp32_strlen(const char *s)
@@ -367,6 +375,7 @@ int shell_platform_esp32_init(void)
     platform_ops.memset = esp32_memset;
     platform_ops.strncpy = esp32_strncpy;
     platform_ops.strcmp = esp32_strcmp;
+    platform_ops.strncmp = esp32_strncmp;
     platform_ops.strlen = esp32_strlen;
     platform_ops.strtok_r = esp32_strtok_r;
     platform_ops.vsnprintf = esp32_vsnprintf;

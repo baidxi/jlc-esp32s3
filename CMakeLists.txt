@@ -8,5 +8,5 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 idf_build_set_property(COMPILE_OPTIONS "-mfix-esp32-psram-cache-issue" APPEND)
 
 # "Trim" the build. Include the minimal set of components, main, and anything it depends on.
-idf_build_set_property(MINIMAL_BUILD ON)
+idf_build_set_property(MINIMAL_BUILD OFF)
 project(jlc-esp32s3)

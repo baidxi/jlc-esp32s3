@@ -10,7 +10,8 @@
 #include "shell_platform.h"
 #include "shell.h"
 #include "shell_cmds.h"
-#include "fs/fs.h"
+#include "fs/vfs.h"
+#include "fs/sysfs.h"
 #include "device.h"
 #include "bus.h"
 #include "tty/tty.h"
@@ -89,11 +90,68 @@ void app_main(void)
         return;
     }
     
-    /* 初始化sysfs虚拟文件系统 */
-    ESP_LOGI(TAG, "Initializing sysfs virtual file system...");
-    if (sysfs_init() != 0) {
-        ESP_LOGE(TAG, "Failed to initialize sysfs virtual file system");
+    
+    /* 初始化VFS虚拟文件系统 */
+    ESP_LOGI(TAG, "Initializing VFS virtual file system...");
+    if (vfs_init() != 0) {
+        ESP_LOGE(TAG, "Failed to initialize VFS virtual file system");
         return;
+    }
+    
+    /* 初始化sysfs模块 */
+    ESP_LOGI(TAG, "Initializing sysfs module...");
+    if (sysfs_register() != 0) {
+        ESP_LOGE(TAG, "Failed to initialize sysfs module");
+        return;
+    }
+    
+    /* 挂载sysfs模块到根目录 */
+    ESP_LOGI(TAG, "Mounting sysfs module to root directory...");
+    if (sysfs_mount("/") != 0) {
+        ESP_LOGE(TAG, "Failed to mount sysfs module to root directory");
+        return;
+    }
+    
+    /* 测试sysfs模块功能 */
+    ESP_LOGI(TAG, "Testing sysfs module functionality...");
+    
+    /* 创建测试目录 */
+    if (sysfs_mkdir("/test", 0755) != 0) {
+        ESP_LOGE(TAG, "Failed to create test directory");
+    } else {
+        ESP_LOGI(TAG, "Test directory created successfully");
+    }
+    
+    /* 创建测试文件 */
+    const char *test_data = "Hello, sysfs!";
+    if (sysfs_create_file("/test/hello.txt", 0644, test_data, shell_strlen(test_data)) != 0) {
+        ESP_LOGE(TAG, "Failed to create test file");
+    } else {
+        ESP_LOGI(TAG, "Test file created successfully");
+    }
+    
+    /* 创建测试链接 */
+    if (sysfs_create_symlink("/test/link.txt", "/test/hello.txt") != 0) {
+        ESP_LOGE(TAG, "Failed to create test symlink");
+    } else {
+        ESP_LOGI(TAG, "Test symlink created successfully");
+    }
+    
+    /* 测试查找节点 */
+    struct sysfs_node *node;
+    if (sysfs_lookup("/test/hello.txt", &node) == 0) {
+        ESP_LOGI(TAG, "Node lookup successful");
+        
+        /* 测试获取节点数据 */
+        char *data;
+        size_t data_size;
+        if (sysfs_get_data(node, &data, &data_size) == 0) {
+            ESP_LOGI(TAG, "Node data: %.*s", data_size, data);
+        } else {
+            ESP_LOGE(TAG, "Failed to get node data");
+        }
+    } else {
+        ESP_LOGE(TAG, "Node lookup failed");
     }
     
     /* 初始化设备驱动框架 */

@@ -234,7 +234,16 @@ int i2c_esp32_init(struct i2c_esp32_adapter *adap, struct i2c_esp32_config *conf
     
     adap->initialized = 1;
     
-    ESP_LOGI(TAG, "I2C master initialized successfully");
+    /* 注册I2C适配器 */
+    if (i2c_register_adapter(&adap->adapter) != 0) {
+        ESP_LOGE(TAG, "Failed to register I2C adapter");
+        i2c_del_master_bus(adap->bus_handle);
+        adap->bus_handle = NULL;
+        adap->initialized = 0;
+        return -1;
+    }
+    
+    ESP_LOGI(TAG, "I2C master initialized and registered successfully");
     return 0;
 }
 
@@ -246,6 +255,9 @@ void i2c_esp32_deinit(struct i2c_esp32_adapter *adap)
     }
     
     ESP_LOGI(TAG, "Deinitializing ESP32 I2C master on port %d", adap->port_num);
+    
+    /* 注销I2C适配器 */
+    i2c_unregister_adapter(&adap->adapter);
     
     /* 设备句柄现在由每个I2C设备自己管理，不需要在这里删除 */
     

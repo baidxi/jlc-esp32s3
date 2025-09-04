@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stddef.h>
 
+#define MAX_PATH    1024
+
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 #ifndef static_assert

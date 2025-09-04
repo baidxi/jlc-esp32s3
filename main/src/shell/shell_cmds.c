@@ -18,5 +18,4 @@ void shell_cmds_init(void)
     cmd_top_init();
     cmd_clear_init();
     cmd_reboot_init();
-    cmd_ls_init();
 }

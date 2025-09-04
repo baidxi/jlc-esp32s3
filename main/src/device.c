@@ -4,7 +4,6 @@
 
 #include "device.h"
 #include "driver.h"
-#include "fs/fs.h"
 
 static struct list_head device_list;
 
@@ -39,13 +38,7 @@ int device_register(struct device *dev)
     /* 注意：这里不能重复添加同一个链表节点到不同的链表 */
     /* 总线设备列表应该由总线管理，这里暂时不处理 */
 
-    /* 注册设备到sysfs */
-    ret = sysfs_register_device(dev);
-    if (ret != 0) {
-        /* 如果sysfs注册失败，从设备列表中移除 */
-        list_del(&dev->list);
-        return ret;
-    }
+    /* 设备注册成功 */
 
     return 0;
 }
@@ -61,8 +54,7 @@ void device_unregister(struct device *dev)
         dev->driver->remove(dev);
     }
 
-    /* 从sysfs注销设备 */
-    sysfs_unregister_device(dev);
+    /* 设备注销成功 */
 
     /* 从设备列表中移除 */
     list_del(&dev->list);

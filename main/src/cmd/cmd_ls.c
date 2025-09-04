@@ -4,7 +4,7 @@
 #include "shell.h"
 #include "shell_platform.h"
 #include "cmd.h"
-#include "fs/fs.h"
+#include "fs/vfs.h"
 
 /**
  * @brief ls命令处理函数
@@ -16,9 +16,10 @@
 int cmd_ls(shell_context_t *shell, int argc, char **argv)
 {
     char path[128] = {0};
+    struct vfs_node *node;
+    int fd, ret;
     char buf[512] = {0};
-    struct sysfs_node *node;
-    int ret;
+    struct dirent dirent;
     
     /* 如果没有指定路径，默认为根目录 */
     if (argc < 2) {
@@ -28,30 +29,56 @@ int cmd_ls(shell_context_t *shell, int argc, char **argv)
     }
     
     /* 查找节点 */
-    node = sysfs_find_node(path);
-    if (!node) {
+    ret = vfs_lookup(path, &node);
+    if (ret != 0) {
         shell_printf(shell, "Path '%s' not found\r\n", path);
         return -1;
     }
     
     /* 如果是目录，列出子节点 */
-    if (node->type == SYSFS_NODE_DIR) {
-        ret = sysfs_list_dir(node, buf, sizeof(buf));
-        if (ret > 0) {
-            // shell_printf(shell, "Contents of %s:\r\n", path);
-            shell_printf(shell, "%s", buf);
-        } else {
-            shell_printf(shell, "Directory %s is empty\r\n", path);
+    if (node->type == VFS_NODE_TYPE_DIR) {
+        struct file *dir_file;
+        
+        /* 打开目录 */
+        ret = vfs_open(path, O_RDONLY, 0, &dir_file);
+        if (ret != 0) {
+            shell_printf(shell, "Failed to open directory %s\r\n", path);
+            return -1;
         }
+        
+        shell_printf(shell, "Contents of %s:\r\n", path);
+        
+        /* 读取目录内容 */
+        while (vfs_readdir(dir_file, &dirent) == 0) {
+            shell_printf(shell, "%s\r\n", dirent.d_name);
+        }
+        
+        /* 关闭目录 */
+        vfs_close(dir_file);
     } else {
         /* 如果是文件，读取内容 */
-        ret = sysfs_read_node(node, buf, sizeof(buf));
+        struct file *file;
+        
+        /* 打开文件 */
+        ret = vfs_open(path, O_RDONLY, 0, &file);
+        if (ret != 0) {
+            shell_printf(shell, "Failed to open file %s\r\n", path);
+            return -1;
+        }
+        
+        shell_printf(shell, "Contents of %s:\r\n", path);
+        
+        /* 读取文件内容 */
+        ret = vfs_read(file, buf, sizeof(buf) - 1);
         if (ret > 0) {
-            // shell_printf(shell, "Contents of %s:\r\n", path);
+            buf[ret] = '\0';
             shell_printf(shell, "%s", buf);
         } else {
             shell_printf(shell, "Failed to read file %s\r\n", path);
         }
+        
+        /* 关闭文件 */
+        vfs_close(file);
     }
     
     return 0;

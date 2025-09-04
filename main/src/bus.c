@@ -5,7 +5,6 @@
 #include "bus.h"
 #include "device.h"
 #include "driver.h"
-#include "fs/fs.h"
 
 static struct list_head bus_list;
 
@@ -33,13 +32,6 @@ int bus_register(struct bus_type *bus)
 
     list_add_tail(&bus->list, &bus_list);
 
-    /* 注册总线到sysfs */
-    ret = sysfs_register_bus(bus);
-    if (ret != 0) {
-        /* 如果sysfs注册失败，从总线列表中移除 */
-        list_del(&bus->list);
-        return ret;
-    }
 
     return 0;
 }
@@ -50,8 +42,6 @@ void bus_unregister(struct bus_type *bus)
         return;
     }
 
-    /* 从sysfs注销总线 */
-    sysfs_unregister_bus(bus);
 
     /* 从总线列表中移除 */
     list_del(&bus->list);

@@ -186,6 +186,15 @@ struct shell_platform_ops {
     int (*strcmp)(const char *s1, const char *s2);
     
     /**
+     * @brief 字符串比较（指定长度）
+     * @param s1 字符串1
+     * @param s2 字符串2
+     * @param n 比较长度
+     * @return 比较结果
+     */
+    int (*strncmp)(const char *s1, const char *s2, size_t n);
+    
+    /**
      * @brief 字符串长度
      * @param s 字符串
      * @return 字符串长度
@@ -294,6 +303,9 @@ const struct shell_platform_ops* shell_platform_get_ops(void);
 
 #define shell_strcmp(s1, s2) \
     shell_platform_get_ops()->strcmp(s1, s2)
+
+#define shell_strncmp(s1, s2, n) \
+    shell_platform_get_ops()->strncmp(s1, s2, n)
 
 #define shell_strlen(s) \
     shell_platform_get_ops()->strlen(s)
